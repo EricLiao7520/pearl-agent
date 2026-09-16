@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Type
 from pydantic import BaseModel, Field
 
-class GoogleSearchParams(BaseModel):
+class WebSearchParams(BaseModel):
     search_query: str
     num_results: int = Field(default=2, description="The number of results to return from the Google search")
 
@@ -19,7 +19,7 @@ class GetWeatherParams(BaseModel):
     hour: str = Field(default="12", description="The hour of the day to get weather data for, in the format 'HH' (24-hour format)")
 
 class APIResponse(BaseModel):
-    api_name: str = Field(description="The name of the API to use for the query. Must be one of: 'google_search', 'get_stock_data', 'compute', 'get_weather'")
+    api_name: str = Field(description="The name of the API to use for the query. Must be one of: 'web_search', 'get_stock_data', 'compute', 'get_weather'")
 
 
 class BaseTool(ABC):

@@ -55,7 +55,7 @@ class DeepResearchAgent:
         sources: List[str] = []
         collected_evidence: List[str] = []
 
-        search_tool = self.registry.get("google_search")
+        search_tool = self.registry.get("web_search")
         for sub_q in sub_queries:
             results = search_tool.run(sub_q, num_results=2)
             if not results:

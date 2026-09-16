@@ -1,7 +1,7 @@
 # pearl/tools/registry.py
 from typing import Dict, List, Optional
 from pearl.tools.base import BaseTool
-from pearl.tools.search import GoogleSearchTool
+from pearl.tools.search import WebSearchTool
 from pearl.tools.finance import StockDataTool
 from pearl.tools.math import MathTool
 from pearl.tools.weather import WeatherTool
@@ -28,7 +28,7 @@ class ToolRegistry:
     @classmethod
     def default(cls) -> "ToolRegistry":
         reg = cls()
-        reg.register(GoogleSearchTool())
+        reg.register(WebSearchTool())
         reg.register(StockDataTool())
         reg.register(MathTool())
         reg.register(WeatherTool())
