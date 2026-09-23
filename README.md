@@ -13,17 +13,19 @@ Pearl Agent is a Python framework for answering questions with language models a
 
 ## Installation
 
-Requires Python 3.12 or newer.
+Requires Python 3.12 or newer and uv.
 
 ```bash
 git clone <repository-url>
 cd pearl-agent
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
+uv sync
 ```
 
-Alternatively, install the declared dependencies with `pip install -r requirements.txt` and make the `src` directory available on `PYTHONPATH`.
+`uv sync` creates the project environment and installs dependencies from `pyproject.toml` and the committed `uv.lock` file. Run Python commands in that environment with `uv run`, for example:
+
+```bash
+uv run python -m pearl_agent.mcp_server
+```
 
 ## Configuration
 
