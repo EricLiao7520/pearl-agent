@@ -19,7 +19,7 @@ class GetWeatherParams(BaseModel):
     hour: str = Field(default="12", description="The hour of the day to get weather data for, in the format 'HH' (24-hour format)")
 
 class APIResponse(BaseModel):
-    api_name: str = Field(description="The name of the API to use for the query. Must be one of: 'web_search', 'get_stock_data', 'compute', 'get_weather'")
+    api_name: str = Field(description="The name of the API to use for the query. Must be one of the registered tool names provided in the enum.")
 
 
 class BaseTool(ABC):

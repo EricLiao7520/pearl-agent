@@ -15,23 +15,25 @@ class MultiLMAgent:
         decomposition_model: str = "meta-llama/Llama-3.3-70B-Instruct-Turbo",
         iterative_refinement_model: str = "meta-llama/Llama-3.3-70B-Instruct-Turbo",
         fusion_model: str = "meta-llama/Llama-3.1-8B-Instruct",
+        llm_fn=generate_together,
         generation_temp: float = 0.7,
     ):
         self.router = router
         self.decomposition_model = decomposition_model
         self.iterative_refinement_model = iterative_refinement_model
         self.fusion_model = fusion_model
+        self.llm = llm_fn
         self.generation_temp = generation_temp
 
     def generate(
         self,
         query: str, 
         model: str = "meta-llama/Llama-3.1-8B-Instruct",
-        temperature: float = 0.7
-    ):
+        temperature = 0.7
+    ):  
         message = [{"role": "user", "content": query}]
         try:
-            response = generate_together(model=model, messages=message, temperature=temperature)
+            response = self.llm(model=model, messages=message, temperature=temperature)
             return response.content
         except Exception as e:
             return f"Error generating response: {e}"
@@ -73,7 +75,7 @@ class MultiLMAgent:
         """Helper function to break down a complex user query into smaller subqueries."""
         prompt = self._get_query_decomposition_prompt(query)
         response = self.generate(prompt,model=self.decomposition_model, temperature=self.generation_temp)
-        parsed_results = re.findall(r"<sub-query>(.*?)</sub-query>", response)
+        parsed_results = re.findall(r"<sub-query>(.*?)</sub-query>", response, flags=re.DOTALL)
         parsed_results = [q.strip() for q in parsed_results]
         if not parsed_results:
             print("Warning: No subqueries are generated, fallback to orignal query")
@@ -172,6 +174,7 @@ class MultiLMAgent:
             "3. Synthesize the responses into a single, direct, coherent, and comprehensive final answer.\n"
             "4. Do not include commentary comparing the models. State the final answer directly.\n\n"
             f"User Query:\n{query}\n\n"
+            f"Tool Evidence:\n{json.dumps(decomposed_queries)}\n\n"
             f"Candidate Responses:\n{formatted_responses}"
         )
         fuse_response = self.generate(fuse_prompt, model=self.fusion_model, temperature=self.generation_temp)
@@ -256,7 +259,7 @@ class MultiLMAgent:
         f"Query: {query}\n"
         "Category:"
         )
-        decision = self.generate(router_prompt, model=self.fusion_model, temperature=0.0).strip()
+        decision = self.generate(router_prompt, model=self.fusion_model, temperature=0.0).strip().upper()
 
         if "PARALLEL" in decision:
             return self.decompose_and_fuse(query)

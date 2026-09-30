@@ -4,21 +4,22 @@ from pearl_agent.tools.registry import ToolRegistry
 from pearl_agent.core.llm import generate_together
 
 class DeepResearchAgent:
-    def __init__(self, tool_registry: ToolRegistry):
+    def __init__(self, tool_registry: ToolRegistry, llm_fn=generate_together):
         self.registry = tool_registry
         self.generation_temp = 0.7
         self.model = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+        self.llm = llm_fn
 
     def generate(
             self, 
             query: str, 
-            model: str = "wayliao7520-fbe8/llama",
+            model: str = "meta-llama/Meta-Llama-3.1-8B-Instruct",
             temperature: float = 0.7
         ) -> str:
             """Generates a response to the query using the specified model."""
             message = [{"role": "user", "content": query}]
             try:
-                response = generate_together(model=model, messages=message, temperature=temperature)
+                response = self.llm(model=model, messages=message, temperature=temperature)
                 return response.content
             except Exception as e:
                 return f"Error generating response: {e}"
@@ -31,7 +32,7 @@ class DeepResearchAgent:
             "2. Enclose EACH sub-query within <sub-query>...</sub-query> tags.\n\n"
             f"User query: {query}"
         )
-        response = self.generate(prompt)
+        response = self.generate(prompt, model=self.model, temperature=self.generation_temp)
         parsed_results = re.findall(r"<sub-query>(.*?)</sub-query>", response)
         parsed_results = [q.strip() for q in parsed_results]
         if not parsed_results:

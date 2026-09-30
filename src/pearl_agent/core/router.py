@@ -81,10 +81,20 @@ class ToolRouter:
         """
         target_model = model or self.router_model
         tools_desc = self.registry.get_descriptions()
+        tool_names = self.registry.list_names()
+        if not tool_names:
+            return {
+                "api_used": None,
+                "params": None,
+                "results": None,
+                "error": "No tools registered",
+            }
+        schema = APIResponse.model_json_schema()
+        schema["properties"]["api_name"]["enum"] = tool_names
         system_prompt = (
             "You are an API router. Select the single best API tool for the user query.\n"
-            "Available tools:\n{tools_desc}\n\n"
-            f"You must respond with a JSON object conforming strictly to this schema:\n{json.dumps(APIResponse.model_json_schema())}"
+            f"Available tools:\n{tools_desc}\n\n"
+            f"You must respond with a JSON object conforming strictly to this schema:\n{json.dumps(schema)}"
         )
         messages = [
                     {"role": "system", "content": system_prompt},
@@ -94,7 +104,7 @@ class ToolRouter:
             response = self.llm(
                 model=target_model,
                 messages=messages,
-                response_format={"type": "json_object", "schema": APIResponse.model_json_schema()}
+                response_format={"type": "json_object", "schema": schema}
             )
             content = response.content
             parsed = json.loads(content)

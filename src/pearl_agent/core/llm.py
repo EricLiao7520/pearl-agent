@@ -21,7 +21,7 @@ def get_client() -> OpenAI:
 def generate_together(
     model: str,
     messages: List[Dict],
-    temperature: float = 0.7,
+    temperature: Optional[float] = None,
     response_format: Optional[Dict] = None,
     max_tokens: Optional[int] = None
 ):
@@ -33,8 +33,11 @@ def generate_together(
     args = {
         "model": model,
         "messages": messages,
-        "temperature": temperature,
     }
+    #Optional parameter for GPT-4 and other models
+    if temperature is not None:
+        args["temperature"] = temperature
+    
     if response_format:
         args["response_format"] = response_format
     if max_tokens:
